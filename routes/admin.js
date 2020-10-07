@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const adminController = require('../controllers/AdminController');
-const {upload} = require('../middlewares/multer');
+const {uploadSingle, uploadMultiple} = require('../middlewares/multer');
 
 // startpoint dashboard
 router.get('/dashboard', adminController.viewDashboard);
@@ -13,16 +13,21 @@ router.put('/category', adminController.editCategory);
 router.delete('/category/:id', adminController.deleteCategory);
 //endpoint CRUD category
 
-//startpoint CRUD category
+//startpoint CRUD bank
 router.get('/bank', adminController.viewBank);
-router.post("/bank", upload, adminController.addBank);
-router.put("/bank", upload, adminController.editBank);
+router.post("/bank", uploadSingle, adminController.addBank);
+router.put("/bank", uploadSingle, adminController.editBank);
 router.delete("/bank/:id", adminController.deleteBank);
-//endpoint CRUD category
+//endpoint CRUD bank
 
-
-
+//startpoint CRUD item
 router.get('/item', adminController.viewItem);
+router.post('/item', uploadMultiple, adminController.addItem);
+router.get("/item/show-image/:id", adminController.showImageItem);
+
+// endpoint CRUD item
+
+
 router.get('/booking', adminController.viewBooking);
 
 

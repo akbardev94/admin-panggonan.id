@@ -1,21 +1,26 @@
 const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 
 const activitySchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   type: {
     type: String,
-    required: true
+    required: true,
   },
   imageUrl: {
     type: String,
-    required: true
+    required: true,
   },
   isPopular: {
     type: Boolean,
-    required: true
+    required: true,
+  },
+  itemId: {
+    type: ObjectId,
+    ref: Item,
   },
 });
 

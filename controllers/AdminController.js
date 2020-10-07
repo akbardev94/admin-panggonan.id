@@ -1,5 +1,7 @@
 const Category = require("../models/Category");
 const Bank = require("../models/Bank");
+const Item = require("../models/Item");
+const Image = require("../models/Image");
 const fs = require("fs-extra");
 const path = require("path");
 
@@ -163,8 +165,85 @@ module.exports = {
   },
   // endpoint CRUD bank
 
-  viewItem: (req, res) => {
-    res.render("admin/item/view_item");
+  viewItem: async (req, res) => {
+    try {
+      const item = await Item.find()
+        .populate({ path: "imageId", select: "id imageUrl" })
+        .populate({ path: "categoryId", select: "id name" });
+      // console.log(item);
+      const category = await Category.find();
+      const alertMassage = req.flash("alertMassage");
+      const alertStatus = req.flash("alertStatus");
+      const alert = { massage: alertMassage, status: alertStatus };
+      res.render("admin/item/view_item", {
+        title: "Panggonan.id | Item",
+        category,
+        alert,
+        item,
+        action: "view",
+      });
+    } catch (error) {
+      req.flash("alertMassage", `${error.massage}`);
+      req.flash("alertStatus", "danger");
+      res.redirect("/admin/item");
+    }
+  },
+
+  addItem: async (req, res) => {
+    try {
+      const { categoryId, title, price, country, city, about } = req.body;
+      if (req.files.length > 0) {
+        const category = await Category.findOne({ _id: categoryId });
+        const newItem = {
+          categoryId: category._id,
+          title,
+          description: about,
+          price,
+          country,
+          city,
+        };
+        const item = await Item.create(newItem);
+        category.itemId.push({ _id: item._id });
+        await category.save();
+        for (let i = 0; i < req.files.length; i++) {
+          const imageSave = await Image.create({
+            imageUrl: `images/${req.files[i].filename}`,
+          });
+          item.imageId.push({ _id: imageSave._id });
+          await item.save();
+        }
+        req.flash("alertMassage", "Success Add Item");
+        req.flash("alertStatus", "success");
+        res.redirect("/admin/item");
+      }
+    } catch (error) {
+      req.flash("alertMassage", `${error.massage}`);
+      req.flash("alertStatus", "danger");
+      res.redirect("/admin/item");
+    }
+  },
+
+  showImageItem: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const item = await Item.findOne({ _id: id }).populate({
+        path: "imageId",
+        select: "id imageUrl",
+      });
+      const alertMassage = req.flash("alertMassage");
+      const alertStatus = req.flash("alertStatus");
+      const alert = { massage: alertMassage, status: alertStatus };
+      res.render("admin/item/view_item", {
+        title: "Panggonan.id | Show Image Item",
+        alert,
+        item,
+        action: "show image",
+      });
+    } catch (error) {
+      req.flash("alertMassage", `${error.massage}`);
+      req.flash("alertStatus", "danger");
+      res.redirect("/admin/item");
+    }
   },
 
   viewBooking: (req, res) => {
